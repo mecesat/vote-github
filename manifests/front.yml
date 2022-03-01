@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: azure-vote-front
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: azure-vote-front
@@ -21,7 +21,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: azure-vote-front
-        image: acrsea.azurecr.io/azure-vote-front-github:v1
+        image: contosocontainerregistry5320.azurecr.io/azure-vote-front-github:v1
         ports:
         - containerPort: 80
         resources:
