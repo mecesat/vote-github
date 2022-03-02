@@ -89,4 +89,4 @@ jobs:
         strategy: blue-green
         action: deploy
         route-method: smi # substitute with service/smi as per need
-        version-switch-buffer: 2
+        version-switch-buffer: 10
