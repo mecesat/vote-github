@@ -102,12 +102,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: akspromotion
     steps:
-      - run: echo asked for approval
+    - run: echo asked for approval
 
-  promote_or_reject:
-    needs: [approve_canary_release]
-    runs-on: ubuntu-latest
-    steps:
+      ####
+
     - name: "Get code from github repo"
       uses: actions/checkout@master
 
@@ -153,3 +151,53 @@ jobs:
         strategy: canary
         action: reject
         traffic-split-method: smi
+
+  # promote_or_reject:
+  #   needs: [approve_canary_release]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: "Get code from github repo"
+  #     uses: actions/checkout@master
+
+  #   - name: "Set the target AKS cluster"
+  #     uses: Azure/aks-set-context@v1
+  #     with:
+  #       creds: '${{ secrets.AZURE_CREDENTIALS }}'
+  #       cluster-name: ${{ env.CLUSTER_NAME }}
+  #       resource-group: ${{ env.RESOURCE_GROUP }}
+
+  #   - name: "Promote the canary release for azure vote front"
+  #     uses: Azure/k8s-deploy@v1
+  #     if: success()
+  #     timeout-minutes: 5
+  #     with:
+  #       namespace: ${{env.NAMESPACE}}
+  #       manifests: |
+  #         manifests/front.yml
+  #         manifests/service-front.yml
+  #         manifests/ingress.yml
+  #       images: |
+  #         ${{secrets.REGISTRY_URL}}/${{env.IMAGE_NAME}}:${{ github.sha }}
+  #       imagepullsecrets: |
+  #         acr-secret
+  #       strategy: canary
+  #       action: promote
+  #       traffic-split-method: smi
+
+  #   - name: "Reject the canary release for azure vote front"
+  #     uses: Azure/k8s-deploy@v1
+  #     if: failure()
+  #     timeout-minutes: 5
+  #     with:
+  #       namespace: ${{env.NAMESPACE}}
+  #       manifests: |
+  #         manifests/front.yml
+  #         manifests/service-front.yml
+  #         manifests/ingress.yml
+  #       images: |
+  #         ${{secrets.REGISTRY_URL}}/${{env.IMAGE_NAME}}:${{ github.sha }}
+  #       imagepullsecrets: |
+  #         acr-secret
+  #       strategy: canary
+  #       action: reject
+  #       traffic-split-method: smi
