@@ -45,9 +45,15 @@ jobs:
         cluster-name: ${{ env.CLUSTER_NAME }}
         resource-group: ${{ env.RESOURCE_GROUP }}
 
-    - name: "Create the namespace if it does not exist"
-      run: |
-        kubectl create ns ${{env.NAMESPACE}} --dry-run -o json | kubectl apply -f -
+    # - name: "Create the namespace if it does not exist"
+    #   run: |
+    #     kubectl create ns ${{env.NAMESPACE}} --dry-run -o json | kubectl apply -f -
+
+    - name: "Create the namespace"
+      uses: azure/k8s-deploy@v1
+      with:
+        manifests: |
+          manifests/namespace.yml
 
     - name: "Create container registry image pull secret"
       uses: Azure/k8s-create-secret@v1
@@ -65,6 +71,7 @@ jobs:
         namespace: ${{env.NAMESPACE}}
         manifests: |
           manifests/back.yml
+          manifests/service-back.yml
 
     - name: "Deploy azure vote front"
       uses: Azure/k8s-deploy@v1
@@ -73,16 +80,76 @@ jobs:
         namespace: ${{env.NAMESPACE}}
         manifests: |
           manifests/front.yml
-          manifests/service.yml
+          manifests/service-front.yml
           manifests/ingress.yml
         images: |
           ${{secrets.REGISTRY_URL}}/${{env.IMAGE_NAME}}:${{ github.sha }}
         imagepullsecrets: |
           acr-secret
-        #strategy: canary
-        #percentage: 100
+        strategy: canary
+        action: deploy
+        traffic-split-method: smi
+        percentage: 30
+        baseline-and-canary-replicas: 1
 
-    - name: "If azure deployment was not succeeded"
-      if: failure()
-      run: |
-        kubectl rollout undo deployment/azure-vote-front --namespace ${{env.NAMESPACE}}
+    # - name: "If azure deployment was not succeeded"
+    #   if: failure()
+    #   run: |
+    #     kubectl rollout undo deployment/azure-vote-front --namespace ${{env.NAMESPACE}}
+
+  approve_canary_release:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment: akspromotion
+    steps:
+      - run: echo asked for approval
+
+  promote_or_reject:
+    needs: [approveapp]
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Get code from github repo"
+      uses: actions/checkout@master
+
+    - name: "Set the target AKS cluster"
+      uses: Azure/aks-set-context@v1
+      with:
+        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+        cluster-name: ${{ env.CLUSTER_NAME }}
+        resource-group: ${{ env.RESOURCE_GROUP }}
+
+    - name: "Promote the canary release for azure vote front"
+      uses: Azure/k8s-deploy@v1
+      if: ${{ success() }}
+      timeout-minutes: 5
+      with:
+        namespace: ${{env.NAMESPACE}}
+        manifests: |
+          manifests/front.yml
+          manifests/service-front.yml
+          manifests/ingress.yml
+        images: |
+          ${{secrets.REGISTRY_URL}}/${{env.IMAGE_NAME}}:${{ github.sha }}
+        imagepullsecrets: |
+          acr-secret
+        strategy: canary
+        action: promote
+        traffic-split-method: smi
+
+    - name: "Reject the canary release for azure vote front"
+      uses: Azure/k8s-deploy@v1
+      if: ${{ failure() }}
+      timeout-minutes: 5
+      with:
+        namespace: ${{env.NAMESPACE}}
+        manifests: |
+          manifests/front.yml
+          manifests/service-front.yml
+          manifests/ingress.yml
+        images: |
+          ${{secrets.REGISTRY_URL}}/${{env.IMAGE_NAME}}:${{ github.sha }}
+        imagepullsecrets: |
+          acr-secret
+        strategy: canary
+        action: reject
+        traffic-split-method: smi
