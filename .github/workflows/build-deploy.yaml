@@ -118,7 +118,7 @@ jobs:
 
     - name: "Promote the canary release for azure vote front"
       uses: Azure/k8s-deploy@v1
-      if: success()
+      if: ${{ success() }}
       timeout-minutes: 5
       with:
         namespace: ${{env.NAMESPACE}}
@@ -136,7 +136,7 @@ jobs:
 
     - name: "Reject the canary release for azure vote front"
       uses: Azure/k8s-deploy@v1
-      if: failure()
+      if: ${{ failure() }}
       timeout-minutes: 5
       with:
         namespace: ${{env.NAMESPACE}}
