@@ -52,6 +52,7 @@ jobs:
     - name: "Create the namespace"
       uses: azure/k8s-deploy@v1
       with:
+        name: ${{env.NAMESPACE}}
         manifests: |
           manifests/namespace.yml
 
