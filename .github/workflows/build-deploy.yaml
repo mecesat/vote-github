@@ -1,4 +1,4 @@
-name: "Build and deploy - action"
+name: "Canary Deployment"
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 env:
   CLUSTER_NAME: contoso-video
   RESOURCE_GROUP: mslearn-gh-pipelines-5163
-  NAMESPACE: ns-voting-app
+  NAMESPACE: canary-ns
   IMAGE_NAME: azure-vote-front-github
 
 jobs:
@@ -52,9 +52,8 @@ jobs:
     - name: "Create the namespace"
       uses: azure/k8s-deploy@v1
       with:
-        name: ${{env.NAMESPACE}}
         manifests: |
-          manifests/namespace.yml
+          manifests/canary-namespace.yml
 
     - name: "Create container registry image pull secret"
       uses: Azure/k8s-create-secret@v1

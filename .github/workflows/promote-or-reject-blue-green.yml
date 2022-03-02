@@ -1,4 +1,4 @@
-name: "Promote or Reject Blue Green Deployment - action"
+name: "Promote or Reject Blue Green Deployment"
 
 on: 
   workflow_dispatch:

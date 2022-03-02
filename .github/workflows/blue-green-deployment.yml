@@ -1,4 +1,4 @@
-name: "Blue Green Deployment - action"
+name: "Blue Green Deployment"
 
 on:
   push:
@@ -52,9 +52,8 @@ jobs:
     - name: "Create the namespace"
       uses: azure/k8s-deploy@v1
       with:
-        name: ${{env.NAMESPACE}}
         manifests: |
-          manifests/namespace.yml
+          manifests/blue-green-namespace.yml
 
     - name: "Create container registry image pull secret"
       uses: Azure/k8s-create-secret@v1
