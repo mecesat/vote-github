@@ -101,7 +101,6 @@ jobs:
     needs: [deploy]
     runs-on: ubuntu-latest
     environment: akspromotion
-    id: approvement
     steps:
     - run: echo asked for approval
 
@@ -121,7 +120,7 @@ jobs:
 
     - name: "Promote the canary release for azure vote front"
       uses: Azure/k8s-deploy@v1
-      if: {{ jobs.approvement.if == success }}
+      if: {{ jobs.approve_canary_release.if == "success" }}
       timeout-minutes: 5
       with:
         namespace: ${{env.NAMESPACE}}
@@ -139,7 +138,7 @@ jobs:
 
     - name: "Reject the canary release for azure vote front"
       uses: Azure/k8s-deploy@v1
-      if: {{ jobs.approvement.if == failure }}
+      if: {{ jobs.approve_canary_release.if == "failure" }}
       timeout-minutes: 5
       with:
         namespace: ${{env.NAMESPACE}}
