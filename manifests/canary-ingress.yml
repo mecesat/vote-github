@@ -1,12 +1,13 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: vote-github
+  name: canary-ingress
+  namespace: canary-ns
   annotations:
     kubernetes.io/ingress.class: addon-http-application-routing
 spec:
   rules:
-    - host: vote-github.19273e5ee2444e628940.eastus.aksapp.io
+    - host: canary-voting.19273e5ee2444e628940.eastus.aksapp.io
       http:
         paths:
           - backend:

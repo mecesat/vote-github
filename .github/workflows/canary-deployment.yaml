@@ -79,9 +79,9 @@ jobs:
       with:
         namespace: ${{env.NAMESPACE}}
         manifests: |
-          manifests/front.yml
           manifests/service-front.yml
-          manifests/ingress.yml
+          manifests/canary-ingress.yml
+          manifests/front.yml
         images: |
           ${{secrets.REGISTRY_URL}}/${{env.IMAGE_NAME}}:${{ github.sha }}
         imagepullsecrets: |
