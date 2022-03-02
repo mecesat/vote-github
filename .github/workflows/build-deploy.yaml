@@ -105,7 +105,7 @@ jobs:
       - run: echo asked for approval
 
   promote_or_reject:
-    needs: [approveapp]
+    needs: [approve_canary_release]
     runs-on: ubuntu-latest
     steps:
     - name: "Get code from github repo"
